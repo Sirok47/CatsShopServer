@@ -1,23 +1,23 @@
 package repository
 
 import (
-	"CatsShopServer/model"
 	"context"
 	"encoding/json"
+	"github.com/Sirok47/CatsShopServer/model"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo"
 	"time"
 )
 
-func (r CatsShop) CreateUser(u *model.UserParams) error {
-	_, err := r.db.Exec(context.Background(),"insert into users (NickName,isAdmin,Password,Address) values ($1,$2,$3,$4)",u.NickName,u.Admin,u.Password,u.Address)
+func (r CatsShop) CreateUser(ctx context.Context,u *model.UserParams) error {
+	_, err := r.db.Exec(ctx,"insert into users (NickName,isAdmin,Password,Address) values ($1,$2,$3,$4)",u.NickName,u.Admin,u.Password,u.Address)
 	return err
 }
 
-func (r CatsShop) Login(nick string,password string) (string,error) {
+func (r CatsShop) Login(ctx context.Context,nick string,password string) (string,error) {
 	u := model.UserParams{}
-	res, err := r.db.Query(context.Background(),"select * from users where NickName = $1", nick)
+	res, err := r.db.Query(ctx,"select * from users where NickName = $1", nick)
 	defer res.Close()
 	if err != nil {
 		return "error", err
@@ -44,9 +44,9 @@ func (r CatsShop) Login(nick string,password string) (string,error) {
 	return "",echo.ErrUnauthorized
 }
 
-func authorization(pass,nick string, db *pgx.Conn) bool {
+func authorization(ctx context.Context,pass,nick string, db *pgx.Conn) bool {
 	var truePass string
-	res, err := db.Query(context.Background(),"select Password from users where NickName = $1",nick)
+	res, err := db.Query(ctx,"select Password from users where NickName = $1",nick)
 	defer res.Close()
 	if err != nil {
 		return false
@@ -63,26 +63,26 @@ func authorization(pass,nick string, db *pgx.Conn) bool {
 	return false
 }
 
-func (r CatsShop) UpdateUser(u model.UserParams) error {
-	if authorization(u.Password,u.NickName,r.db)==true{
-	_, err := r.db.Exec(context.Background(),"update users set Address = $1 where NickName = $2",u.Address,u.NickName)
+func (r CatsShop) UpdateUser(ctx context.Context,u model.UserParams) error {
+	if authorization(ctx,u.Password,u.NickName,r.db)==true{
+	_, err := r.db.Exec(ctx,"update users set Address = $1 where NickName = $2",u.Address,u.NickName)
 	return err
 }
 return echo.ErrUnauthorized
 }
 
-func (r CatsShop) DeleteUser(u model.UserParams) error {
-	if authorization(u.Password,u.NickName,r.db)==true{
-		_, err := r.db.Exec(context.Background(),"delete from users where NickName = $1", u.NickName)
+func (r CatsShop) DeleteUser(ctx context.Context,u model.UserParams) error {
+	if authorization(ctx,u.Password,u.NickName,r.db)==true{
+		_, err := r.db.Exec(ctx,"delete from users where NickName = $1", u.NickName)
 		return err
 	}
 	return echo.ErrUnauthorized
 }
 
-func (r CatsShop) ListUsers() (string,error) {
+func (r CatsShop) ListUsers(ctx context.Context,) (string,error) {
 	u := model.UserParams{}
 	m := map[string]bool{}
-	result, err := r.db.Query(context.Background(),"select NickName,isadmin from users")
+	result, err := r.db.Query(ctx,"select NickName,isadmin from users")
 	defer result.Close()
 	if err != nil {
 		return "", err

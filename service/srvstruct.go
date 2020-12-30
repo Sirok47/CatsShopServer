@@ -1,7 +1,7 @@
 package service
 
 import (
-	"CatsShopServer/repository"
+	"github.com/Sirok47/CatsShopServer/repository"
 	"github.com/jackc/pgx/v4"
 )
 
