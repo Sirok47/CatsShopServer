@@ -12,7 +12,7 @@ import (
 )
 
 func main(){
-	db, err := pgx.Connect(context.Background(), "postgres://postgres:glazirovanniisirok@localhost:5432/catsshop")
+	db, err := pgx.Connect(context.Background(), "postgres://postgres:glazirovanniisirok@127.0.0.1:5432/catsshop")
 	if err!= nil{
 		fmt.Print(err)
 		return
